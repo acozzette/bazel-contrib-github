@@ -98,8 +98,20 @@ jobs:
       - name: Test
         run: ${{ inputs.bazel_test_command }} --disk_cache=~/.cache/bazel-disk-cache --repository_cache=~/.cache/bazel-repository-cache
 
+      # Workaround for https://github.com/actions/download-artifact/issues/426:
+      # download-artifact v5+ skips creating a named subdirectory when only one artifact exists,
+      # breaking callers that expect each artifact at <name>/* under the workspace.
+      # Uploading a sentinel ensures there are always 2+ artifacts, forcing the multi-artifact
+      # code path which creates a named subdirectory for each artifact.
+      - run: echo "sentinel" > /tmp/_sentinel
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: _sentinel
+          path: /tmp/_sentinel
+          retention-days: 1
+
       # Fetch built artifacts (if any) from earlier jobs, which the release script may want to read.
-      # Extract into ${GITHUB_WORKSPACE}/artifacts/*
+      # Each artifact is extracted into a subdirectory named after the artifact.
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
 
       - name: Build release artifacts and prepare release notes
