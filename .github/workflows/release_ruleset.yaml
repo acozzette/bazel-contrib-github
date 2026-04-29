@@ -113,6 +113,7 @@ jobs:
       # Fetch built artifacts (if any) from earlier jobs, which the release script may want to read.
       # Each artifact is extracted into a subdirectory named after the artifact.
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - run: rm -rf _sentinel
 
       - name: Build release artifacts and prepare release notes
         run: |
